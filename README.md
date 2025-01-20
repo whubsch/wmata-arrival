@@ -1,50 +1,53 @@
-# React + TypeScript + Vite
+# WMATA Train Arrival Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple React-based dashboard that displays real-time train arrival information for Washington Metropolitan Area Transit Authority (WMATA) stations.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Real-time train arrival predictions
+- Station selection via dropdown menu
+- Color-coded line indicators
+- Auto-refresh every 10 seconds
+- Dark/Light mode support
+- URL parameter support for station selection
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file with your WMATA API key:
+   ```
+   VITE_WMATA_API_KEY=your_api_key_here
+   VITE_METRO_STATION=D03  # Optional default station
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-- Configure the top-level `parserOptions` property like this:
+## Usage
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- Select a station from the dropdown menu to view arrivals
+- Alternatively, use URL parameters to specify a station: `?station=D03`
+- The display automatically updates every 10 seconds
+- Train arrivals show the line color, destination, and time until arrival
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Technologies Used
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- HeroUI Components
+- WMATA API
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## License
+
+[MIT License](LICENSE)
+
+## Note
+
+If you use this project as a dashboard, consider getting a WMATA API key to use this application. You can obtain one from the [WMATA Developer Portal](https://developer.wmata.com/) and pass it as a URL parameter (`?api_key=your_api_key_here`).
