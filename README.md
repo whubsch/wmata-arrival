@@ -59,7 +59,7 @@ The dashboard supports the following URL parameters for configuration:
 > [!NOTE]
 > If you use this project as a dashboard, consider getting a WMATA API key to use this application. You can obtain one from the [WMATA Developer Portal](https://developer.wmata.com/).
 
-- `api_key`: Your **optional** WMATA API key (please create one if you use this dashboard frequently)
+- `api_key`: Your **optional** WMATA API key (doing so will save me some API calls 🙏)
 
   ```
   ?api_key=your_api_key_here
@@ -68,7 +68,7 @@ The dashboard supports the following URL parameters for configuration:
 Example with multiple parameters:
 
 ```
-https://whubsch.github.io/?cabi=08246cd5-1f3f-11e7-bf6b-3863bb334450,cdeeb133-ccd7-418f-a8d7-0b5c5380a8ae&bus=1002472,1002335&rail=K04
+https://whubsch.github.io/wmata-arrival/?cabi=08246cd5-1f3f-11e7-bf6b-3863bb334450,cdeeb133-ccd7-418f-a8d7-0b5c5380a8ae&bus=1002472,1002335&rail=K04
 ```
 
 This configuration would show:
