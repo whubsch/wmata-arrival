@@ -31,8 +31,10 @@ export function StationSelect({
           value={station.code[0]}
           textValue={station.name}
         >
-          <div className="flex items-center justify-between">
-            <span>{station.name}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="overflow-x-auto whitespace-nowrap max-w-64">
+              {station.name}
+            </span>
             <div className="flex gap-1">
               {station.lines.map((line) => (
                 <LineChip key={line} line={line} size="sm" />
