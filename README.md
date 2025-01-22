@@ -44,13 +44,13 @@ The dashboard supports the following URL parameters for configuration:
   ?rail=D03
   ```
 
-- `cabi`: **Comma-separated** Capital Bikeshare station IDs. Look up the station IDs [here](https://opendata.dc.gov/datasets/DCGIS::capital-bikeshare-locations/explore).
+- `cabi`: **Comma-separated** Capital Bikeshare station IDs. Look up the station IDs [here](https://www.arcgis.com/apps/mapviewer/index.html?layers=a1f7acf65795451d89f0a38565a975b3).
 
   ```
   ?cabi=08246cd5-1f3f-11e7-bf6b-3863bb334450
   ```
 
-- `bus`: **Comma-separated** WMATA 7-digit bus stop IDs. Look up the stop IDs [here](https://gis.wmata.com/mbsi/default.htm).
+- `bus`: **Comma-separated** WMATA 7-digit bus stop IDs. Look up the stop IDs [here](https://opendata.dc.gov/datasets/DCGIS::metro-bus-stops/explore) (use `REG_ID` field, without the commas).
 
   ```
   ?bus=1002472,1002335

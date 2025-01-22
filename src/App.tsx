@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import RailStation from "./components/RailStation";
-import BikeShareStations from "./components/BikeShareStations";
+import BikeShareStation from "./components/BikeShareStations";
 import BusStops from "./components/BusStops";
 
 export default function App() {
@@ -36,7 +36,7 @@ export default function App() {
 
   return (
     <div className="container mx-auto p-4 md:h-screen">
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <RailStation
           selectedStation={selectedStation}
           onStationChange={handleStationChange}
@@ -44,17 +44,24 @@ export default function App() {
           showStationSelect={!params.get("rail")}
           currentTime={currentTime}
         />
-        {cabiStationIds ? (
-          <BikeShareStations stationIds={cabiStationIds} />
-        ) : null}
+        <div className="flex flex-col sm:flex-row md:flex-col gap-2 flex-auto">
+          {cabiStationIds
+            ? cabiStationIds.map((cabiStationId) => (
+                <BikeShareStation
+                  key={cabiStationId}
+                  stationId={cabiStationId}
+                />
+              ))
+            : null}
+        </div>
         {busStopIds
           ? busStopIds.map((busStopId) => (
               <BusStops
+                key={busStopId}
                 apiKey={
                   params.get("api_key") || import.meta.env.VITE_WMATA_API_KEY
                 }
                 stopId={busStopId}
-                currentTime={currentTime}
               />
             ))
           : null}

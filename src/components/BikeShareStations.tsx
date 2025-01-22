@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardBody, Chip, Divider, Spinner } from "@heroui/react";
+import { MarqueeText } from "./MarqueeText";
 import bolt from "../assets/bolt.svg";
 import bike from "../assets/bike.svg";
 import parking from "../assets/parking.svg";
@@ -8,9 +9,15 @@ interface StatusItemProps {
   icon: string;
   alt: string;
   count: number;
+  itemLoading: boolean;
 }
 
-const StatusItem: React.FC<StatusItemProps> = ({ icon, alt, count }) => {
+const StatusItem: React.FC<StatusItemProps> = ({
+  icon,
+  alt,
+  count,
+  itemLoading,
+}) => {
   const getChipColor = (count: number) => {
     if (count === 0) return "danger";
     if (count <= 2) return "warning";
@@ -18,7 +25,7 @@ const StatusItem: React.FC<StatusItemProps> = ({ icon, alt, count }) => {
   };
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between h-6">
       <div className="flex items-center gap-2">
         <img
           src={icon}
@@ -26,9 +33,15 @@ const StatusItem: React.FC<StatusItemProps> = ({ icon, alt, count }) => {
           alt={alt}
         />
       </div>
-      <Chip color={getChipColor(count)} variant="flat">
-        {count}
-      </Chip>
+      {!itemLoading ? (
+        <Chip color={getChipColor(count)} variant="flat">
+          {count}
+        </Chip>
+      ) : (
+        <div className="h-[28]">
+          <Spinner size="sm" />
+        </div>
+      )}
     </div>
   );
 };
@@ -66,8 +79,8 @@ interface StationInfoResponse {
   };
 }
 
-interface BikeShareStationsProps {
-  stationIds: string[];
+interface BikeShareStationProps {
+  stationId: string;
 }
 
 const STATION_INFO_URL =
@@ -75,40 +88,48 @@ const STATION_INFO_URL =
 const STATION_STATUS_URL =
   "https://gbfs.lyft.com/gbfs/2.3/dca-cabi/en/station_status.json";
 
-const BikeShareStations: React.FC<BikeShareStationsProps> = ({
-  stationIds,
-}) => {
+const BikeShareStation: React.FC<BikeShareStationProps> = ({ stationId }) => {
   const [stationStatuses, setStationStatuses] = useState<StationStatus[]>([]);
   const [stationInfos, setStationInfos] = useState<StationInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStationInfo = async () => {
+      try {
+        const infoResponse = await fetch(STATION_INFO_URL);
+        if (!infoResponse.ok) {
+          throw new Error("Failed to fetch station information");
+        }
+        const infoData: StationInfoResponse = await infoResponse.json();
+        const filteredInfos = infoData.data.stations.filter((station) =>
+          stationId.includes(station.station_id),
+        );
+        setStationInfos(filteredInfos);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      }
+    };
+
+    fetchStationInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
       try {
         setLoading(true);
-        const [statusResponse, infoResponse] = await Promise.all([
-          fetch(STATION_STATUS_URL),
-          fetch(STATION_INFO_URL),
-        ]);
+        const statusResponse = await fetch(STATION_STATUS_URL);
 
-        if (!statusResponse.ok || !infoResponse.ok) {
-          throw new Error("Failed to fetch data");
+        if (!statusResponse.ok) {
+          throw new Error("Failed to fetch status data");
         }
 
         const statusData: StationStatusResponse = await statusResponse.json();
-        const infoData: StationInfoResponse = await infoResponse.json();
-
-        // Filter stations based on provided stationIds
         const filteredStatuses = statusData.data.stations.filter((station) =>
-          stationIds.includes(station.station_id),
-        );
-        const filteredInfos = infoData.data.stations.filter((station) =>
-          stationIds.includes(station.station_id),
+          stationId.includes(station.station_id),
         );
 
         setStationStatuses(filteredStatuses);
-        setStationInfos(filteredInfos);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -116,85 +137,86 @@ const BikeShareStations: React.FC<BikeShareStationsProps> = ({
       }
     };
 
-    fetchData();
+    fetchStatus();
 
-    // Set up polling every 30 seconds
-    const interval = setInterval(fetchData, 60000);
+    // Set up polling every 60 seconds for status updates only
+    const interval = setInterval(fetchStatus, 60000);
 
     return () => clearInterval(interval);
-  }, [stationIds]); // Add stationIds as dependency
+  }, [stationId]);
 
-  if (loading) {
+  if (error) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
-      </div>
+      <Card>
+        <div className="text-red-500 text-center">Error: {error}</div>
+      </Card>
     );
   }
 
-  if (error) {
-    return <div className="text-red-500 text-center">Error: {error}</div>;
-  }
+  const stationStatus = stationStatuses.find(
+    (status) => status.station_id === stationId,
+  );
+  const stationInfo = stationInfos.find(
+    (info) => info.station_id === stationId,
+  );
+
+  if (!stationStatus || !stationInfo) return null;
+
+  const regularBikes =
+    stationStatus.vehicle_types_available.find(
+      (type) => type.vehicle_type_id === "1",
+    )?.count || 0;
+
+  const eBikes =
+    stationStatus.vehicle_types_available.find(
+      (type) => type.vehicle_type_id === "2",
+    )?.count || 0;
+
+  const docksAvailable = stationStatus.num_docks_available || 0;
+
+  const isOperational =
+    stationStatus.is_renting === 1 && stationStatus.is_returning === 1;
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {stationIds.map((stationId) => {
-        const stationStatus = stationStatuses.find(
-          (status) => status.station_id === stationId,
-        );
-        const stationInfo = stationInfos.find(
-          (info) => info.station_id === stationId,
-        );
+    <Card className="flex-auto">
+      <CardBody>
+        <div className="flex flex-col p-2">
+          <div className="flex items-center gap-2 justify-between">
+            <MarqueeText text={stationInfo.name} maxWidth={60} />
+            {!isOperational ? (
+              <Chip color="danger" variant="flat">
+                Out of Service
+              </Chip>
+            ) : null}
+          </div>
+          <h2 className="text-gray-500">Capital Bikeshare</h2>
+        </div>
 
-        if (!stationStatus || !stationInfo) return null;
+        <Divider />
 
-        const regularBikes =
-          stationStatus.vehicle_types_available.find(
-            (type) => type.vehicle_type_id === "1",
-          )?.count || 0;
-
-        const eBikes =
-          stationStatus.vehicle_types_available.find(
-            (type) => type.vehicle_type_id === "2",
-          )?.count || 0;
-
-        const docksAvailable = stationStatus.num_docks_available || 0;
-
-        const isOperational =
-          stationStatus.is_renting === 1 && stationStatus.is_returning === 1;
-
-        return (
-          <Card key={stationId}>
-            <CardBody>
-              <div className="flex flex-col p-2">
-                <div className="flex items-center gap-2 justify-between">
-                  <h1 className="text-2xl font-bold">{stationInfo.name}</h1>
-                  {!isOperational ? (
-                    <Chip color="danger" variant="flat">
-                      Out of Service
-                    </Chip>
-                  ) : null}
-                </div>
-                <h2 className="text-gray-500">Capital Bikeshare</h2>
-              </div>
-
-              <Divider />
-
-              <div className="flex flex-col gap-2 p-2">
-                <StatusItem icon={bike} alt="Bikes" count={regularBikes} />
-                <StatusItem icon={bolt} alt="E-Bikes" count={eBikes} />
-                <StatusItem
-                  icon={parking}
-                  alt="Open docks"
-                  count={docksAvailable}
-                />
-              </div>
-            </CardBody>
-          </Card>
-        );
-      })}
-    </div>
+        <div className="flex flex-col gap-2 p-2 justify-evenly">
+          <StatusItem
+            icon={bike}
+            alt="Bikes"
+            count={regularBikes}
+            itemLoading={loading}
+          />
+          <StatusItem
+            icon={bolt}
+            alt="E-Bikes"
+            count={eBikes}
+            itemLoading={loading}
+          />
+          <StatusItem
+            icon={parking}
+            alt="Open docks"
+            count={docksAvailable}
+            itemLoading={loading}
+          />
+        </div>
+      </CardBody>
+    </Card>
   );
 };
 
-export default BikeShareStations;
+export default BikeShareStation;

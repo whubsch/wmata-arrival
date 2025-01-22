@@ -70,7 +70,7 @@ const RailStation: React.FC<RailStationProps> = ({
   }, [fetchTimings]);
 
   return (
-    <Card>
+    <Card className="flex-auto">
       <CardHeader className="flex justify-between items-center">
         <div className="flex flex-col p-2">
           <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ const RailStation: React.FC<RailStationProps> = ({
           </div>
           <h2 className="text-gray-500">WMATA Rail</h2>
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="gap-4 items-center hidden md:flex">
           {showStationSelect ? (
             <StationSelect
               selectedStation={selectedStation}

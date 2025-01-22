@@ -9,12 +9,12 @@ interface LineChipProps {
 export function LineChip({ line, className = "", size = "lg" }: LineChipProps) {
   const getLineColor = (line: string) => {
     const lineColors: { [key: string]: string } = {
-      RD: "bg-red-500",
-      BL: "bg-blue-500",
-      OR: "bg-orange-500",
-      GR: "bg-green-500",
-      YL: "bg-yellow-500",
-      SV: "bg-gray-400",
+      RD: "bg-[#BF0D3E]",
+      BL: "bg-[#009CDE]",
+      OR: "bg-[#ED8B00]",
+      GR: "bg-[#00B140]",
+      YL: "bg-[#FFD100]",
+      SV: "bg-[#919D9D]",
     };
     return lineColors[line] || "bg-gray-200";
   };
