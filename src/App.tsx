@@ -18,10 +18,12 @@ export default function App() {
   }, []);
 
   const handleStationChange = (station: string) => {
-    setSelectedStation(station);
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set("rail", station);
-    window.history.pushState({}, "", newUrl);
+    if (station) {
+      setSelectedStation(station);
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set("rail", station);
+      window.history.pushState({}, "", newUrl);
+    }
   };
 
   const cabiStationIds = useMemo(() => {
