@@ -130,7 +130,9 @@ const BusStops: React.FC<BusStopsProps> = ({ stopId, apiKey }) => {
                 >
                   {bus.RouteID}
                 </div>
-                <span className="font-medium">{bus.DirectionText}</span>
+                <span className="font-medium">
+                  {formatBusStationName(bus.DirectionText)}
+                </span>
               </div>
               <StatusChip minutes={String(bus.Minutes)} />
             </CardBody>

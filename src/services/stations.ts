@@ -43,5 +43,7 @@ export function formatBusStationName(name: string): string {
     .replace(/\+\w/, (match) => match.toUpperCase())
     .replace(dirRegex, (match) => match.toUpperCase())
     .replace(/\+/, " & ")
-    .replaceAll(/\s+/g, " ");
+    .replaceAll(/\s+/g, " ")
+    .replace(/Av\b/, "Ave")
+    .replace(/-([a-z])/g, (_, letter) => `-${letter.toUpperCase()}`);
 }
