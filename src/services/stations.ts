@@ -29,7 +29,7 @@ export function formatStationName(name: string): string {
   return name
     .replace(/Grv$/, "Grove")
     .replace("N Car", "New Car")
-    .replace("MtVern", "Mount Vernon")
+    .replace(/Mt ?Vern\b/, "Mount Vernon")
     .replace("NewCrlton", "New Carrollton")
     .replace(/Sq/, "Square")
     .replace(/(Av|Ave)$/, "Avenue");

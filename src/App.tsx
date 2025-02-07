@@ -6,7 +6,7 @@ import BusStops from "./components/BusStops";
 export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const [selectedStation, setSelectedStation] = useState(
+  const [selectedStation, setSelectedStation] = useState<string>(
     params.get("rail") || import.meta.env.VITE_METRO_STATION || "D03",
   );
 

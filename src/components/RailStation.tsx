@@ -16,6 +16,7 @@ import {
   getStation,
 } from "../services/stations";
 import { TrainPrediction } from "../objects";
+import stations from "../assets/stations.json";
 
 interface RailStationProps {
   selectedStation: string;
@@ -35,18 +36,78 @@ const RailStation: React.FC<RailStationProps> = ({
   const [predictions, setPredictions] = useState<TrainPrediction[]>([]);
   const [countdown, setCountdown] = useState(10);
 
+  // Find companion station codes
+  const findCompanionCodes = (stationCode: string): string[] => {
+    const stationInfo = stations.stations.find((station) =>
+      station.code.includes(stationCode),
+    );
+    return stationInfo
+      ? stationInfo.code.filter((code) => code !== stationCode)
+      : [];
+  };
+
   const fetchTimings = useCallback(async () => {
     try {
-      const response = await axios.get(
-        `https://api.wmata.com/StationPrediction.svc/json/GetPrediction/${selectedStation}`,
-        {
-          headers: {
-            api_key: apiKey,
-          },
-        },
-      );
+      // Get companion codes
+      const companionCodes = findCompanionCodes(selectedStation);
 
-      setPredictions(response.data.Trains);
+      // Fetch predictions for both the selected station and its companions
+      const stationCodesToFetch = [selectedStation, ...companionCodes];
+
+      // Create an array to store all predictions
+      let allPredictions: TrainPrediction[] = [];
+
+      // Fetch predictions for each station code
+      for (const stationCode of stationCodesToFetch) {
+        const response = await axios.get(
+          `https://api.wmata.com/StationPrediction.svc/json/GetPrediction/${stationCode}`,
+          {
+            headers: {
+              api_key: apiKey,
+            },
+          },
+        );
+
+        allPredictions = [...allPredictions, ...response.data.Trains];
+      }
+
+      // Remove duplicates based on a combination of Line and Destination
+      const uniquePredictions = Array.from(
+        new Set(
+          allPredictions.map((p) =>
+            JSON.stringify({
+              Line: p.Line,
+              DestinationCode: p.DestinationCode,
+              DestinationName: p.DestinationName,
+              Min: p.Min,
+            }),
+          ),
+        ),
+      )
+        .map((p) => JSON.parse(p as string))
+        .sort((a, b) => {
+          // Custom sorting logic
+          const specialOrderMap: { [key: string]: number } = {
+            BRD: -2,
+            ARR: -1,
+          };
+
+          // Check if either prediction is a special case (BRD or ARR)
+          const aSpecial = specialOrderMap[a.Min];
+          const bSpecial = specialOrderMap[b.Min];
+
+          // Handle special cases first
+          if (aSpecial !== undefined && bSpecial !== undefined) {
+            return aSpecial - bSpecial;
+          }
+          if (aSpecial !== undefined) return -1;
+          if (bSpecial !== undefined) return 1;
+
+          // For numerical values, convert to number and compare
+          return parseInt(a.Min) - parseInt(b.Min);
+        });
+
+      setPredictions(uniquePredictions);
       setCountdown(10);
     } catch (error) {
       console.error("Error fetching predictions:", error);
