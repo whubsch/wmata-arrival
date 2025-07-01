@@ -26,11 +26,7 @@ export function StationSelect({
       }}
     >
       {sortedStations.map((station) => (
-        <AutocompleteItem
-          key={station.code[0]}
-          value={station.code[0] || station.name}
-          textValue={station.name}
-        >
+        <AutocompleteItem key={station.code[0]} textValue={station.name}>
           <div className="flex items-center justify-between gap-2">
             <span className="overflow-x-auto whitespace-nowrap max-w-64">
               {station.name}
