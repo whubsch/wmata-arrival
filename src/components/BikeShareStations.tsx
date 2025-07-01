@@ -112,7 +112,7 @@ const BikeShareStation: React.FC<BikeShareStationProps> = ({ stationId }) => {
     };
 
     fetchStationInfo();
-  }, []);
+  }, [stationId]);
 
   useEffect(() => {
     const fetchStatus = async () => {

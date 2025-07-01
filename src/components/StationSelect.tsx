@@ -28,7 +28,7 @@ export function StationSelect({
       {sortedStations.map((station) => (
         <AutocompleteItem
           key={station.code[0]}
-          value={station.code[0]}
+          value={station.code[0] || station.name}
           textValue={station.name}
         >
           <div className="flex items-center justify-between gap-2">
