@@ -6,11 +6,12 @@ interface StatusChipProps {
 }
 
 export function StatusChip({ minutes, className = "" }: StatusChipProps) {
-  const isArriving = minutes === "ARR" || minutes === "BRD";
+  const displayMinutes = minutes === "0" ? "ARR" : minutes;
+  const isArriving = displayMinutes === "ARR" || displayMinutes === "BRD";
 
   return isArriving ? (
     <Chip color="warning" className={className}>
-      {minutes}
+      {displayMinutes}
     </Chip>
   ) : (
     <Chip color="default" className={className}>
