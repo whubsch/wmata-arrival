@@ -6,9 +6,12 @@ import BusStops from "./components/BusStops";
 export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const [selectedStation, setSelectedStation] = useState<string>(
-    params.get("rail") || import.meta.env.VITE_METRO_STATION || "D03",
-  );
+
+  const railStationIds = useMemo(() => {
+    const railParam = params.get("rail");
+    const defaultStation = import.meta.env.VITE_METRO_STATION || "D03";
+    return railParam ? railParam.split(",") : [defaultStation];
+  }, [params]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -17,11 +20,14 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleStationChange = (station: string) => {
-    if (station) {
-      setSelectedStation(station);
+  const handleStationChange = (oldStation: string, newStation: string) => {
+    if (newStation) {
+      const updatedStations = railStationIds.map((station) =>
+        station === oldStation ? newStation : station,
+      );
+
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set("rail", station);
+      newUrl.searchParams.set("rail", updatedStations.join(","));
       window.history.pushState({}, "", newUrl);
     }
   };
@@ -39,13 +45,22 @@ export default function App() {
   return (
     <div className="container mx-auto p-4 md:h-screen">
       <div className="flex flex-wrap gap-2">
-        <RailStation
-          selectedStation={selectedStation}
-          onStationChange={handleStationChange}
-          apiKey={params.get("api_key") || import.meta.env.VITE_WMATA_API_KEY}
-          showStationSelect={!params.get("rail")}
-          currentTime={currentTime}
-        />
+        <>
+          {railStationIds.map((stationId, index) => (
+            <RailStation
+              key={`${stationId}-${index}`}
+              selectedStation={stationId}
+              onStationChange={(newStation) =>
+                handleStationChange(stationId, newStation)
+              }
+              apiKey={
+                params.get("api_key") || import.meta.env.VITE_WMATA_API_KEY
+              }
+              showStationSelect={!params.get("rail")}
+              currentTime={currentTime}
+            />
+          ))}
+        </>
         <div className="flex flex-col sm:flex-row md:flex-col gap-2 flex-auto">
           {cabiStationIds
             ? cabiStationIds.map((cabiStationId) => (
